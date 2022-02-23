@@ -1,14 +1,51 @@
-  version: '3.0'
-
+version: "3.7"
 services:
-  mysql:
-    image: mysql:8
-    ports:
-      - 3310:3306
+  app:
+    build:
+      args:
+        user: antaku
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: event
+    container_name: event-app
+    restart: unless-stopped
+    working_dir: /var/www/
     volumes:
-      - ~/apps/mysql:/var/lib/mysql
+      - ./:/var/www
+    networks:
+      - application
+
+  db:
+    image: mariadb:10.3.17
+    container_name: app-db
+    restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD=S3cret
-      - MYSQL_PASSWORD=An0thrS3crt
-      - MYSQL_USER=event_user
-      - MYSQL_DATABASE=event_db
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - .docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - application
+
+  nginx:
+    image: nginx:alpine
+    container_name: app-nginx
+    restart: unless-stopped
+    ports:
+      - 3000:80
+    volumes:
+      - ./:/var/www
+      - .docker/nginx:/etc/nginx/conf.d/
+    networks:
+      - application
+    depends_on:
+      - app
+
+networks:
+  application:
+    driver: bridge

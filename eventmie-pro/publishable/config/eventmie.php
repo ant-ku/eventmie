@@ -79,7 +79,7 @@ return [
     |
     |
     */
-    'default_lang'  => 'en',
+    'default_lang'  => 'fr',
 
 
     /**
