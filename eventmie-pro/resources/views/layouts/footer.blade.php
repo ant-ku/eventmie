@@ -96,9 +96,11 @@
                 <div class="lgx-footer-bottom lgx-footer-single pb-4">
                     <ul class="list-inline">
                         @foreach(lang_selector() as $val)
+                        @if($val == 'en' || $val == 'fr')
                         <li class="list-inline-item border-seperator">
                             <a class="col-grey {{ $val == config('app.locale') ? 'active' : '' }}" href="{{ route('eventmie.change_lang', ['lang' => $val]) }}">@lang('eventmie-pro::em.lang_'.$val)</a>
                         </li>
+                        @endif
                         @endforeach
                     </ul>
                 </div>

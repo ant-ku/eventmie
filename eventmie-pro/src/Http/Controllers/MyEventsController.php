@@ -1022,7 +1022,8 @@ class MyEventsController extends Controller
                 $filename        = time().str_random(10).'.'.'jpg';
             
             $path            = '/storage/'.$params['path'].'/'.Carbon::now()->format('FY').'/';
-            $image_resize    = Image::make(base64_decode($image))->resize($params['width'], $params['height']);
+            $image_resize    = Image::make(base64_decode($image));//->resize($params['width'], $params['height']);
+            dd("test");
 
             // first check if directory exists or not
             

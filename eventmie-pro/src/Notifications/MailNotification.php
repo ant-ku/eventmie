@@ -36,11 +36,11 @@ class MailNotification extends Notification implements ShouldQueue
     public function via($notifiable)
     {
         // check mail creds
-        if(checkMailCreds())
+       // if(checkMailCreds())
             return ['mail', CustomDb::class];
             
         // if mail creds not set then send only database notifications
-        return [CustomDb::class];
+       // return [CustomDb::class];
     }
 
     /**

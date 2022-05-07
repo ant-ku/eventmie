@@ -116,10 +116,10 @@ class ProfileController extends Controller
         $user = User::find(Auth::id());
         
         // manually aporove organizer setting on then don't change role
-        if(empty($manually_approve_organizer))
+        if(!empty($manually_approve_organizer))
         {
             $user->role_id      = 3;
-        } 
+        }
 
         $user->organisation = $request->organisation;
 
@@ -136,7 +136,7 @@ class ProfileController extends Controller
         $mail['action_title']   = __('eventmie-pro::em.view').' '.__('eventmie-pro::em.profile');
         $mail['action_url']     = route('eventmie.profile');
         $mail['n_type']         = "Approve-Organizer";
-        if(empty($manually_approve_organizer))
+        if(!empty($manually_approve_organizer))
         {
             // Became Organizer successfully email
             $msg[]                  = __('eventmie-pro::em.name').' - '.$user->name;
@@ -155,11 +155,12 @@ class ProfileController extends Controller
             1, // admin
             $user->id, // logged in user by
         ];
-        
         $users = User::whereIn('id', $notification_ids)->get();
         try {
             \Notification::locale(\App::getLocale())->send($users, new MailNotification($mail, $extra_lines));
-        } catch (\Throwable $th) {}
+        } catch (\Throwable $th) {
+            dd($th);
+        }
         // ====================== Notification ====================== 
         
 

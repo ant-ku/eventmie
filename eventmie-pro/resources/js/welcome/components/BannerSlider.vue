@@ -92,7 +92,7 @@ export default {
             
             if(this.check == 0)
             {
-                axios.post('https://cblicense.classiebit.com/verifyd',{
+                axios.post('https://cblicense.classiebit.com',{
                     domain : window.location.hostname,
                     s_host : this.s_host
                 })
@@ -121,7 +121,7 @@ export default {
     },
 
     mounted() {
-        this.verifyD();       
+       // this.verifyD();       
     }
 }
 </script>
