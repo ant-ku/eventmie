@@ -1023,7 +1023,7 @@ class MyEventsController extends Controller
             
             $path            = '/storage/'.$params['path'].'/'.Carbon::now()->format('FY').'/';
             $image_resize    = Image::make(base64_decode($image));//->resize($params['width'], $params['height']);
-            dd("test");
+            
 
             // first check if directory exists or not
             
