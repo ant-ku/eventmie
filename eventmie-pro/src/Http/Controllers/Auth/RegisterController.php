@@ -1,14 +1,13 @@
 <?php
 
 namespace Classiebit\Eventmie\Http\Controllers\Auth;
+
+use App\Rules\EmailOrPhone;
 use Facades\Classiebit\Eventmie\Eventmie;
-
 use App\Http\Controllers\Controller;
-
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
-
 use Classiebit\Eventmie\Models\User;
 use Classiebit\Eventmie\Notifications\MailNotification;
 
@@ -53,7 +52,7 @@ class RegisterController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function showRegistrationForm()
-    {   
+    {
         \Session::put('url.intended',\URL::previous());
 
         return Eventmie::view('eventmie::auth.register');
@@ -69,7 +68,7 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'identifier' => ['required', new EmailOrPhone(true)],
             'password' => ['required', 'string', 'min:8'],
             'accept' => ['required'],
         ]);
@@ -83,17 +82,26 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $user   = User::create([
-                    'name'      => $data['name'],
-                    'email'     => $data['email'],
-                    'password'  => Hash::make($data['password']),
-                    'role_id'  => 2,
-                ]);
+        $userData = [
+            'name'      => $data['name'],
+            'password'  => Hash::make($data['password']),
+            'role_id'  => 2,
+        ];
+
+        if (!is_numeric($data['identifier'])) {
+            $userData['email'] = $data['identifier'];
+        }
+
+        if(is_numeric($data['identifier'])) {
+            $userData['phone'] = $data['identifier'];
+        }
+
+        $user   = User::create($userData);
 
         // Send welcome email
         if(!empty($user->id))
         {
-            // ====================== Notification ====================== 
+            // ====================== Notification ======================
             $mail['mail_subject']   = __('eventmie-pro::em.register_success');
             $mail['mail_message']   = __('eventmie-pro::em.get_tickets');
             $mail['action_title']   = __('eventmie-pro::em.login');
@@ -105,22 +113,19 @@ class RegisterController extends Controller
                 1, // admin
                 $user->id, // new registered user
             ];
-            
+
             $users = User::whereIn('id', $notification_ids)->get();
-            if(checkMailCreds()) 
+            if(checkMailCreds())
             {
                 try {
-                    \Notification::locale(\App::getLocale())->send($users, new MailNotification($mail));
+                    \Notification::locale(\App::getLocale())->send($users, new MailNotification($mail)); //Send sms norification
                 } catch (\Throwable $th) {}
             }
-            // ====================== Notification ======================     
+            // ====================== Notification ======================
         }
-        
-        $this->redirectTo = \Session::get('url.intended'); 
-        
+
+        $this->redirectTo = \Session::get('url.intended');
+
         return $user;
     }
-
-    
-    
 }
