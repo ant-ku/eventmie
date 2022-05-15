@@ -1,8 +1,9 @@
 <?php
 
 namespace Classiebit\Eventmie\Http\Controllers\Auth;
-use Facades\Classiebit\Eventmie\Eventmie;
 
+use App\Rules\EmailOrPhone;
+use Facades\Classiebit\Eventmie\Eventmie;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Classiebit\Eventmie\Models\User;
@@ -34,7 +35,7 @@ class LoginController extends Controller
      * @var string
      */
     protected $redirectTo = '/';
-    
+
 
     /**
      * Create a new controller instance.
@@ -42,7 +43,7 @@ class LoginController extends Controller
      * @return void
      */
     public function __construct()
-    {  
+    {
          // language change
         $this->middleware('common');
         $this->middleware('guest')->except('logout');
@@ -72,14 +73,14 @@ class LoginController extends Controller
         catch(\Throwable $th){
             return $this->loginRedirect();
         }
-        
+
         // email is required
         if(empty($userSocial->getEmail()))
             return error_redirect([__('eventmie-pro::em.email').' '.__('eventmie-pro::em.required'), __('eventmie-pro::em.no_email_attached').ucfirst($social)]);
 
         $user = User::where(['email' => $userSocial->getEmail()])->first();
 
-        // if user with same email already exist then login 
+        // if user with same email already exist then login
         if($user)
         {
             \Auth::login($user);
@@ -101,7 +102,7 @@ class LoginController extends Controller
                 'role_id'  => 2,
                 'email_verified_at'  => Carbon::now(), // default email verify true in oauth
             ]);
-            
+
             $user = User::where(['email' => $userSocial->getEmail()])->first();
 
             \Auth::login($user);
@@ -109,7 +110,7 @@ class LoginController extends Controller
             // Send welcome email
             if(!empty($new_user->email))
             {
-                // ====================== Notification ====================== 
+                // ====================== Notification ======================
                 $mail['mail_subject']   = __('eventmie-pro::em.register_success');
                 $mail['mail_message']   = __('eventmie-pro::em.get_tickets');
                 $mail['action_title']   = __('eventmie-pro::em.login');
@@ -121,17 +122,17 @@ class LoginController extends Controller
                     1, // admin
                     $new_user->id, // new registered user
                 ];
-                
+
                 $users = User::whereIn('id', $notification_ids)->get();
-                if(checkMailCreds()) 
+                if(checkMailCreds())
                 {
                     try {
                         \Notification::locale(\App::getLocale())->send($users, new MailNotification($mail));
                     } catch (\Throwable $th) {}
                 }
-                // ====================== Notification ======================     
+                // ====================== Notification ======================
             }
-            
+
             return $this->loginRedirect();
         }
     }
@@ -147,9 +148,9 @@ class LoginController extends Controller
         if (\Auth::check()) {
             return $this->loginRedirect();
         }
-        
+
         \Session::put('url.intended',\URL::previous());
-        
+
         return Eventmie::view('eventmie::auth.login');
     }
 
@@ -158,26 +159,33 @@ class LoginController extends Controller
      */
 
     // check if authenticated, then redirect to welcome page
-    protected function authenticated() 
+    protected function authenticated()
     {
         if (\Auth::check()) {
             return $this->loginRedirect();
         }
     }
 
-    public function login(Request $request) 
+    public function login(Request $request)
     {
         $this->validate($request, [
-            'email'    => 'required|email|max:512',
-            'password' => 'required|max:512'
+            'identifier' => ['required', new EmailOrPhone()],
+            'password' => 'required|max:512',
         ]);
 
-        $flag = \Auth::attempt ([
-            'email' => $request->get ( 'email' ),
-            'password' => $request->get ( 'password' ) 
-        ]);
-        
-        if ($flag) 
+        $authCredentials = ['password' => $request->get ( 'password' )];
+
+        if (!is_numeric($request->get ( 'identifier' ))) {
+            $authCredentials['email'] = $request->get ( 'identifier' );
+        }
+
+        if(is_numeric($request->get ( 'identifier' ))) {
+            $authCredentials['phone'] = $request->get ( 'identifier' );
+        }
+
+        $flag = \Auth::attempt ($authCredentials);
+
+        if ($flag)
         {
             // check if user is not disabled
             if(! \Auth::user()['status'])
@@ -187,12 +195,12 @@ class LoginController extends Controller
             }
 
             return $this->loginRedirect();
-        } 
-        else 
+        }
+        else
         {
             return error_redirect( __('eventmie-pro::em.incorrect_email_password') );
         }
-    }   
+    }
 
     private function loginRedirect()
     {
@@ -201,16 +209,14 @@ class LoginController extends Controller
         if(!empty(session('redirect_to_event')))
         {
             $redirect = session('redirect_to_event');
-            
+
             // forget session
             session()->forget(['redirect_to_event']);
         }
-        
+
         // redirect to event
-        return redirect(\Session::get('url.intended')); 
+        return redirect(\Session::get('url.intended'));
     }
 
-
-    
 }
 

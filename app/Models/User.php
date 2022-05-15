@@ -20,6 +20,7 @@ class User extends \Classiebit\Eventmie\Models\User
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
     ];
 
