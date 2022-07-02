@@ -2,11 +2,11 @@
 
 /**
  * Eventmie asset helpers
- * 
- * Make a direct access link to eventmie asset route 
- * 
+ *
+ * Make a direct access link to eventmie asset route
+ *
 */
-if (!function_exists('eventmie_asset')) 
+if (!function_exists('eventmie_asset'))
 {
     function eventmie_asset($path, $secure = null)
     {
@@ -16,11 +16,11 @@ if (!function_exists('eventmie_asset'))
 
 /**
  * Eventmie URL
- * 
+ *
  * prefix eventmie url
- * 
+ *
 */
-if (!function_exists('eventmie_url')) 
+if (!function_exists('eventmie_url'))
 {
     function eventmie_url($url = '')
     {
@@ -30,19 +30,19 @@ if (!function_exists('eventmie_url'))
 
 /**
  * Eventmie Dateformat carbon
- * 
+ *
  * dateformat helper
- * 
+ *
 */
-if (!function_exists('format_carbon_date')) 
+if (!function_exists('format_carbon_date'))
 {
     function format_carbon_date($only_date = false)
     {
         $df = explode('::', setting('regional.date_format'))[0];
 
         if($only_date)
-           return $df; 
-        
+           return $df;
+
         $tf = 'h:i A';
         if(setting('regional.time_format') == '24')
             $tf = 'H:i';
@@ -55,11 +55,11 @@ if (!function_exists('format_carbon_date'))
 
 /**
  * Eventmie Dateformat Javascript
- * 
+ *
  * javascript dateformat helper
- * 
+ *
 */
-if (!function_exists('format_js_date')) 
+if (!function_exists('format_js_date'))
 {
     function format_js_date()
     {
@@ -68,18 +68,18 @@ if (!function_exists('format_js_date'))
         /* TEST */
         // $df = '';
         /* TEST */
-        
+
         return $df;
     }
 }
 
 /**
  * Eventmie Timeformat Javascript
- * 
+ *
  * javascript timeformat helper
- * 
+ *
 */
-if (!function_exists('format_js_time')) 
+if (!function_exists('format_js_time'))
 {
     function format_js_time()
     {
@@ -96,25 +96,25 @@ if (!function_exists('format_js_time'))
 
 /**
  * Notifications
- * 
+ *
  * show notifications
- * 
+ *
 */
-if (!function_exists('notifications')) 
+if (!function_exists('notifications'))
 {
     /**
-     * Notificaion for all views 
+     * Notificaion for all views
      */
-    
+
     function notifications()
     {
         $user_id        = \Auth::id();
         $user           = \Classiebit\Eventmie\Models\User::find($user_id);
         $mode           = config('database.connections.mysql.strict');
 
-        $table    = 'notifications'; 
+        $table    = 'notifications';
         $query          = DB::table($table);
-        
+
 
         if(!$mode)
         {
@@ -142,7 +142,7 @@ if (!function_exists('notifications'))
                             DB::raw("ANY_VALUE($table.updated_at) as updated_at"),
                         );
         }
-        
+
         $notifications  =   $query->select($select)
                             ->where("$table.notifiable_id",  $user_id )
                             ->where(["$table.read_at" =>  null])
@@ -151,20 +151,20 @@ if (!function_exists('notifications'))
                             ->get();
 
         $notifications  = to_array($notifications);
-                            
-        return  ['notifications' => $notifications, 'total_notify' => $user->unreadNotifications->count()];                    
-    } 
+
+        return  ['notifications' => $notifications, 'total_notify' => $user->unreadNotifications->count()];
+    }
 }
-    
+
 
 /**
  * Detect RTL
- * 
+ *
  * detect RTL language according to languages
  * defined in the evenmie config
- * 
+ *
 */
-if (!function_exists('is_rtl')) 
+if (!function_exists('is_rtl'))
 {
     /**
      * return boolean
@@ -174,17 +174,17 @@ if (!function_exists('is_rtl'))
         $rtl_langs = config('eventmie.rtl_langs');
 
         $current_lang = App::getLocale();
-        if (in_array($current_lang, $rtl_langs)) 
+        if (in_array($current_lang, $rtl_langs))
             return true;
 
         return false;
-    } 
+    }
 }
 
 /**
- *  get all language folder name from resource/lang/vendor/eventmie 
+ *  get all language folder name from resource/lang/vendor/eventmie
  */
-if (!function_exists('lang_selector')) 
+if (!function_exists('lang_selector'))
 {
     /**
      * return boolean
@@ -196,20 +196,20 @@ if (!function_exists('lang_selector'))
         $lang_path = resource_path('lang'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'eventmie-pro');
         if(config('voyager.pkg_dev_mode') || config('voyager.demo_mode'))
             $lang_path = dirname(__DIR__).'/../publishable/lang/eventmie-pro';
-        
+
         // fetch langs from folder
         $directories = File::directories($lang_path);
         $directories = array_map('basename', $directories);
 
         return $directories;
-    } 
+    }
 }
 
 
 /**
  *  eloquent data to array
  */
-if (!function_exists('to_array')) 
+if (!function_exists('to_array'))
 {
     /**
      * return array
@@ -224,11 +224,11 @@ if (!function_exists('to_array'))
 }
 
 
-    
+
 /**
  *  checkMailCreds
  */
-if (!function_exists('checkMailCreds')) 
+if (!function_exists('checkMailCreds'))
 {
     /**
      * don't send in demo mode
@@ -238,19 +238,37 @@ if (!function_exists('checkMailCreds'))
     function checkMailCreds()
     {
         // don't send in demo mode
-        if (config('voyager.demo_mode')) 
+        if (config('voyager.demo_mode'))
             return false;
 
         return true;
     }
 }
 
+/**
+ *  checkSmsCreds
+ */
+if (!function_exists('checkSmsCreds'))
+{
+    /**
+     * don't send in demo mode
+     *
+     * @return boolean
+     */
+    function checkSmsCreds()
+    {
+        // don't send in demo mode
+        if (config('voyager.demo_mode'))
+            return false;
 
-    
+        return true;
+    }
+}
+
 /**
  *  headerMenu
  */
-if (!function_exists('headerMenu')) 
+if (!function_exists('headerMenu'))
 {
     /**
      * add header menu items added from Admin Panel
@@ -285,11 +303,10 @@ if (!function_exists('headerMenu'))
 }
 
 
-    
 /**
  *  footerMenu
  */
-if (!function_exists('footerMenu')) 
+if (!function_exists('footerMenu'))
 {
     /**
      * add footer menu items added from Admin Panel
@@ -324,11 +341,11 @@ if (!function_exists('footerMenu'))
 }
 
 
-    
+
 /**
  *  categoriesMenu
  */
-if (!function_exists('categoriesMenu')) 
+if (!function_exists('categoriesMenu'))
 {
     /**
      * add categories menu items added from Admin Panel
@@ -348,7 +365,7 @@ if (!function_exists('categoriesMenu'))
 /**
  *  change time into user timezone
  */
-if (!function_exists('userTimezone')) 
+if (!function_exists('userTimezone'))
 {
     function userTimezone($date = null, $from_format = null, $to_formate = null)
     {
@@ -359,7 +376,7 @@ if (!function_exists('userTimezone'))
 /**
  *  show timezone
  */
-if (!function_exists('showTimezone')) 
+if (!function_exists('showTimezone'))
 {
     function showTimezone()
     {
@@ -370,7 +387,7 @@ if (!function_exists('showTimezone'))
 /**
  *  change time into user timezone
  */
-if (!function_exists('serverTimezone')) 
+if (!function_exists('serverTimezone'))
 {
     function serverTimezone($date = null, $from_format = null, $to_formate = null)
     {
