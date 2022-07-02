@@ -34,27 +34,27 @@ class User extends \TCG\Voyager\Models\User  implements MustVerifyEmail
     {
         return User::
             where([
-                'id' => $params['customer_id'], 
-            ])   
-            ->first();   
+                'id' => $params['customer_id'],
+            ])
+            ->first();
     }
 
     // get user
     public function get_user($params = [])
     {
-        return User::where($params)->first();   
+        return User::where($params)->first();
     }
 
     // get organisers
     public function get_organisers()
     {
-        return User::where(['role_id' => 3])->get();   
+        return User::where(['role_id' => 3])->get();
     }
 
     // total customers
     public function total_customers($user_id = null)
     {
-        
+
         if(!empty($user_id))
         {
             return Booking::distinct('customer_id')->where(['organiser_id' => $user_id])->pluck('customer_id')->count();
@@ -63,7 +63,7 @@ class User extends \TCG\Voyager\Models\User  implements MustVerifyEmail
 
         return User::where(['role_id' => 2])->count();
     }
-    
+
     // total organizers
     public function total_organizers($user_id = null)
     {
@@ -84,20 +84,20 @@ class User extends \TCG\Voyager\Models\User  implements MustVerifyEmail
      */
     public function sendPasswordResetNotification($token)
     {
-        // ====================== Notification ====================== 
+        // ====================== Notification ======================
         //forgot password notification
         try {
             $this->notify(new ForgotPasswordNotification($token));
         } catch (\Throwable $th) {}
-        // ====================== Notification ====================== 
+        // ====================== Notification ======================
     }
 
-    // get all tags for particular organiser 
+    // get all tags for particular organiser
     public function get_tags($params = [])
-    {   
+    {
         $user = User::find($params['organizer_id']);
         return $user->tags()->orderBy('updated_at', 'DESC')->paginate(10);
-        
+
     }
 
     /**
@@ -130,13 +130,13 @@ class User extends \TCG\Voyager\Models\User  implements MustVerifyEmail
                     $query->where(function($query) use($params) {
 
                         $query->orWhere('title','LIKE',"%{$params['search']}%");
-                         
+
                     });
                 }
 
                 $query->limit(10);
-               
+
             }])->where(['id' => $params['organizer_id'] ])->first()->tags;
-       
+
     }
 }

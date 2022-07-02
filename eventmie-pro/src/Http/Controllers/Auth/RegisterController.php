@@ -3,9 +3,11 @@
 namespace Classiebit\Eventmie\Http\Controllers\Auth;
 
 use App\Rules\EmailOrPhone;
+use Classiebit\Eventmie\Notifications\SmsNotification;
 use Facades\Classiebit\Eventmie\Eventmie;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Classiebit\Eventmie\Models\User;
@@ -115,10 +117,23 @@ class RegisterController extends Controller
             ];
 
             $users = User::whereIn('id', $notification_ids)->get();
-            if(checkMailCreds())
+            if(checkMailCreds() && $user->email)
             {
                 try {
-                    \Notification::locale(\App::getLocale())->send($users, new MailNotification($mail)); //Send sms norification
+                    Notification::locale(\App::getLocale())->send($users, new MailNotification($mail));//Send mail norification
+                } catch (\Throwable $th) {}
+            }
+            if(checkSmsCreds() && $user->phone)
+            {
+                $content = __('eventmie-pro::em.get_tickets') . ' ' .eventmie_url();
+                try {
+                    Notification::locale(\App::getLocale())->send(
+                        [$user],
+                        new SmsNotification(
+                            $user->phone,
+                            $content
+                        )
+                    );
                 } catch (\Throwable $th) {}
             }
             // ====================== Notification ======================

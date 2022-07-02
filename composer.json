@@ -12,10 +12,11 @@
         "classiebit/eventmie-pro": "^1.7",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
-        "guzzlehttp/guzzle": "^7.0.1",
+        "guzzlehttp/guzzle": "^7.4",
         "laravel/framework": "8.*",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.0",
+        "laravel/vonage-notification-channel": "^3.0",
         "propaganistas/laravel-phone": "^4.3",
         "rachidlaasri/laravel-installer": "^4.1"
     },
